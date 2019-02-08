@@ -1,0 +1,187 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Google Books</title>
+    <!-- Bootstrap -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <h3 style="text-align:center">Google Book Search</h3>
+            <br />
+            <div class="col-md-6">
+                <div class="row" form id="bookForm">
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" name="search" id="searchBar" placeholder="Search">
+                    </div>
+                    <div class="col-sm-4">
+                        <button type="button" class="btn btn-default" data-frmid="#bookForm" id="search">Search</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br />
+        <table class="row table table-hovered">
+            <thead>
+                <th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>ISBN</th>
+                <th>Average Rating</th>
+                <th>Image</th>
+                <th>ePub</th>
+                <th>Publish Date</th>
+                </th>
+            </thead>
+            <tbody class="bookSearchResults"></tbody>
+        </table>
+    </div>
+
+    <template id="bookTemplate">
+        <tr class="container">
+            <td class="titleName"></td>
+            <td class="authorName"></span></td>
+            <td class="isbnNumber13"></span></td>
+            <td class="ratingNumber"></span></td>
+            <td><img class="bookImage" src=""></td>
+            <td class="epub"></span></td>
+            <td class="publishDate"></span></td>
+        </div>
+    </template>
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <img class="modalBookThumbnail" src="">
+                    </div>
+                    <div class="col-md-8">
+                        <h4><span class="modalTitleName"></span></h4>
+                        <p>By: <span class="modalAuthorName"></span></p>
+                        <p>Published Date: <span class="modalPublishDate""></span></p>
+                        <p>Average Rating: <span class=" modalRatingNumber"></span></p>
+                        <p>ISBN: <span class="modalIsbn13Number"></span></p>
+                        <p>ePub: <span class="modalePub"></span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	<script src="templates\startup.js"></script>
+	<!-- All your code goes below here-->
+	<script type="text/javascript">
+
+    startup.page.startUp = function () {
+        $("#search").on('click', startup.page.handlers.search);
+        $(".bookSearchResults").on('click', '.bookImage', startup.page.handlers.showModal);
+    };
+
+    startup.page.handlers.search = function (evt) {
+        evt.preventDefault();
+        var data = $(".form-control").val();
+        console.log(data);
+        startup.page.getAllBooks(data, startup.page.ajaxSuccess, startup.page.ajaxError);
+    };
+
+    startup.page.bookLoop = function (allBooks) {
+        for (var i = 0; i < allBooks.length; i++) {
+            console.log(allBooks[i]);
+            startup.page.writeToTemplate(allBooks[i]);
+        };
+    };
+
+    startup.page.writeToTemplate = function (data) {
+        var cloneTemplate = startup.page.getTemplate();
+        cloneTemplate.find(".titleName").text(data.volumeInfo.title);
+        cloneTemplate.find(".authorName").text(data.volumeInfo.authors);
+        cloneTemplate.find(".isbnNumber13").text(data.volumeInfo.industryIdentifiers[0].identifier);
+        cloneTemplate.find(".ratingNumber").text(data.volumeInfo.averageRating);
+        cloneTemplate.find(".epub").text(data.accessInfo.epub.isAvailable);
+        cloneTemplate.find(".publishDate").text(data.volumeInfo.publishedDate);
+        cloneTemplate.find(".bookImage").attr("src", data.volumeInfo.imageLinks.smallThumbnail);
+        $(".bookSearchResults").append(cloneTemplate);
+    };
+
+    startup.page.handlers.showModal = function (evt) {   ///show reply modal window
+        evt.preventDefault(); 
+        evt.stopPropagation(); 
+        startup.page.lastImgClicked = $(this).closest('.container');
+        console.log(startup.page.lastImgClicked);
+        $(".modalTitleName").text(startup.page.lastImgClicked.find('.titleName').text());
+        $(".modalAuthorName").text(startup.page.lastImgClicked.find('.authorName').text());
+        $(".modalPublishDate").text(startup.page.lastImgClicked.find('.publishDate').text());
+        $(".modalRatingNumber").text(startup.page.lastImgClicked.find('.ratingNumber').text());
+        $(".modalIsbn10Number").text(startup.page.lastImgClicked.find('.isbnNumber10').text());
+        $(".modalIsbn13Number").text(startup.page.lastImgClicked.find('.isbnNumber13').text());
+        $(".modalePub").text(startup.page.lastImgClicked.find('.epub').text());
+        $(".modalBookThumbnail").attr("src", startup.page.lastImgClicked.find('.bookImage').attr("src"));
+        $('#myModal').modal('show');
+    };
+
+    // GET SEARCH RESULTS
+    startup.page.getAllBooks = function (data, onSuccess, onError) {
+        var url = `https://www.googleapis.com/books/v1/volumes?q=${data}`;
+        var settings = {
+            cache: false
+            , contentType: "application/json"
+            , dataType: "json"
+            , success: onSuccess
+            , error: onError
+            , type: "GET"
+        };
+        $.ajax(url, settings);
+    };
+
+    // AJAX SUCCESS
+    startup.page.ajaxSuccess = function (data, status, xhr) {
+        console.log(status);
+        startup.page.bookLoop(data.items);
+    };
+
+    // AJAX ERROR
+    startup.page.ajaxError = function (data, status, xhr) {
+        console.log(status);
+    };
+
+    // TO CLONE TEMPLATE
+    startup.page.getTemplate = function () {
+            return $($("#bookTemplate").html()).clone();
+        };
+
+    startup.page.grabFrmValues = function (frmId) {
+        var obj = {};
+        $.each($(frmId).serializeArray(), function () {
+            obj[this.name] = this.value;
+        });
+        return obj;
+    }
+    </script>
+</body>
+</html>
